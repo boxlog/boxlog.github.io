@@ -2,8 +2,8 @@ title:
 email:              semineun@naver.com
 description:        
 author:             Jun
-baseurl:            "boxlog.github.io"
-url:                "http://boxlog.github.io"
+baseurl:            ""
+url:                "https://boxlog.github.io"
 
 # Social Profiles
 #twitter_username:   SBootstrap
