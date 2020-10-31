@@ -5,6 +5,8 @@ author:             Jun
 baseurl:            "/boxlog.github.io"
 url:                "https://boxlog.github.io"
 
+google_fonts: "Nanum+Gothic:400,700"
+
 # Social Profiles
 #twitter_username:   SBootstrap
 github_username:    boxlog
