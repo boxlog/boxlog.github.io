@@ -1,9 +1,9 @@
-title:              Box Blog
+title:              
 email:              semineun@naver.com
-description:        배움
+description:        
 author:             Jun
-baseurl:            "/boxlog.github.io"
-url:                "https://boxlog.github.io"
+baseurl:            "boxlog.github.io"
+url:                "http://boxlog.github.io"
 
 # Social Profiles
 #twitter_username:   SBootstrap

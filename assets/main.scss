@@ -3,3 +3,11 @@
 ---
 
 @import "styles";
+
+.category{
+    .active{
+        color: greenyellow;
+        font-size: 40px;
+        font-weight: initial;
+    }
+}
