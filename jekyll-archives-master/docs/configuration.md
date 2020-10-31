@@ -5,20 +5,9 @@ Archives configuration is done in the site's `_config.yml` file, under the `jeky
 ### Default configuration
 
 ```yml
-category_archive:
-  type: jekyll-archives
-  path: /categories/
-
-tag_archive:
-  type: jekyll-archives
-  path: /tags/
 jekyll-archives:
-  enabled: 
-    - categories
-    - tags
-  layout: 
-    category: archive-taxonomy
-    tag: archive-taxonomy
+  enabled: []
+  layout: archive
   permalinks:
     year: '/:year/'
     month: '/:year/:month/'
