@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: http://boxlog.github.io/sitemap.xml
