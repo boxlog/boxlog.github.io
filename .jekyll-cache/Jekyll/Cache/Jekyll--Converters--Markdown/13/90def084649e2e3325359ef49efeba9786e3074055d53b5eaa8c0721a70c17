@@ -1,0 +1,131 @@
+I"f(<p>보통 DB를 연동하는 방법은 여러가지가 있습니다.</p>
+
+<p>그 중 우리나라 SI 업체에서 실무에서 가장 많이 쓰는 프레임워크는 당연히 <strong>myBatis</strong> 라고 할 수 있습니다.</p>
+
+<p><strong>myBatis</strong> 가 분명히 파라미터 값도 자동으로 넣어주는 등등..</p>
+
+<p>여러가지로 편한 것은 사실이지만 결국 SQL 쿼리문은 반복적으로 작성해야 된다는 것이 단점입니다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="o">&lt;</span><span class="k">select</span> <span class="n">id</span><span class="o">=</span><span class="nv">"findMemberById"</span> <span class="n">resultType</span><span class="o">=</span><span class="nv">"Member"</span><span class="o">&gt;</span>
+        <span class="k">SELECT</span> <span class="n">id</span>
+              <span class="p">,</span><span class="n">name</span>
+              <span class="p">,</span><span class="n">price</span>
+        <span class="k">FROM</span> <span class="n">Member</span>
+        <span class="k">WHERE</span> <span class="n">id</span> <span class="o">=</span> <span class="o">#</span><span class="err">{</span><span class="n">memberId</span><span class="err">}</span>
+    <span class="o">&lt;/</span><span class="k">select</span><span class="o">&gt;</span>
+
+    <span class="o">&lt;</span><span class="k">select</span> <span class="n">id</span><span class="o">=</span><span class="nv">"findAllMember"</span> <span class="n">resultType</span><span class="o">=</span><span class="nv">"Member"</span><span class="o">&gt;</span>
+        <span class="k">SELECT</span> <span class="n">id</span>
+              <span class="p">,</span><span class="n">name</span>
+              <span class="p">,</span><span class="n">price</span>
+        <span class="k">FROM</span> <span class="n">Member</span>
+    <span class="o">&lt;/</span><span class="k">select</span><span class="o">&gt;</span>
+
+    <span class="o">&lt;</span><span class="k">insert</span> <span class="n">id</span><span class="o">=</span><span class="nv">"insertMember"</span> <span class="n">parameterType</span><span class="o">=</span><span class="nv">"Member"</span><span class="o">&gt;</span>
+      <span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">members</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">price</span><span class="p">)</span>
+      <span class="k">VALUES</span> <span class="p">(</span><span class="o">#</span><span class="err">{</span><span class="n">name</span><span class="err">}</span><span class="p">,</span> <span class="o">#</span><span class="err">{</span><span class="n">price</span><span class="err">}</span><span class="p">)</span>
+    <span class="o">&lt;/</span><span class="k">insert</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>대충 작성한 MemberMapper.xml 파일입니다.</p>
+
+<p>위의 코드만 보면 참 간단해보이지만 프로젝트가 커지면 커질수록 위의 SQL 구문 또한 엄청나게 증가합니다.</p>
+
+<p>그리고 종종 클라이언트의 요구 사항이 바뀌어서 테이블 요소를 추가해야하거나 이름을 바꿔야 되는 일이 생기는데 SQL문을 하나씩 수정할 때마다 짜증나죠</p>
+
+<p>거기다 SQL문이 수백개, 수천개가 되는 상황이면 UPDATE문과 DELETE문 INSERT문을 전부 바꿔야되는 경우 실수가 일어날 수 밖에 없습니다.</p>
+
+<p>두번째로는 객체의 상속 관계와 테이블의슈퍼타입-서브타입의 관계는 비슷한거 같지만 상당히 다릅니다.</p>
+
+<p>일단 조회하는 곳에서부터 차이가 나는데</p>
+
+<p><img src="/img/posts/vip.png" alt="vip" /></p>
+
+<p>위의 클래스를보면 Member 클래스를 상속 받는</p>
+
+<p>VIP 고객 클래스와 Normal 고객 클래스가 있습니다.</p>
+
+<p>자바 컬렉션에 저장하려면 단순히</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">vip</span><span class="o">);</span>
+</code></pre></div></div>
+<p>만 해주면 끝이지만 SQL 같은 경우는 상속 객체를 하나씩 전부 분해해서 저장해야합니다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">MEMBER</span> <span class="p">...</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">VIP</span> <span class="p">...</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">NORMAL</span> <span class="p">...</span>
+</code></pre></div></div>
+
+<p>조회는 또 어떻게 해야할까요?</p>
+
+<p>각각의 테이블에 대해서 조인 SQL을 또 작성하고
+다시 각각의 객체를 생성합니다. ~~ 노가다 ~~</p>
+
+<p>이게 구조가 단순할 때나 쉽지 점점 규모가 커질수록 SQL 노가다의 지옥파티가 펼쳐집니다.</p>
+
+<p>그래서 DB에 저장할 객체에는 상속 관계를 안쓰긴 합니다만..</p>
+
+<p>어쨌든 이러한 문제들 때문에 SQL 의존적인 코드는 엔티티 자체에 대해 신뢰성이 깨져버리게 됩니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kd">class</span> <span class="nc">Member</span><span class="o">{</span>
+        <span class="nc">String</span> <span class="n">id</span><span class="o">;</span>
+        <span class="no">VIP</span> <span class="n">vip</span><span class="o">;</span>
+        <span class="n">string</span> <span class="n">username</span><span class="o">;</span>
+
+        <span class="o">...</span>
+    <span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>예를 들어서 Member 내부에 VIP라는 객체를 선언했다고 칩시다.</p>
+
+<p>아이디값을 얻기 위해서 자바 같은경우는 객체 인스턴스를 만들어서 member.getVIP().getId() 이런 식으로 꺼내오기만 하면됩니다.</p>
+
+<p>하지만 SQL 구문 같은 경우는 다릅니다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">M</span><span class="p">.</span> <span class="o">*</span><span class="p">,</span> <span class="n">V</span><span class="p">.</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">MEMBER</span> <span class="n">M</span> <span class="k">JOiN</span> <span class="n">VIP</span> <span class="n">V</span> <span class="k">ON</span> <span class="n">M</span><span class="p">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">V</span><span class="p">.</span><span class="n">ID</span>
+</code></pre></div></div>
+<p>조인 후</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// SQL 실행</span>
+<span class="nc">Member</span> <span class="n">member</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Member</span><span class="o">();</span>
+<span class="c1">// 회원 관련 정보 입력</span>
+<span class="no">VIP</span> <span class="n">vip</span> <span class="o">=</span> <span class="k">new</span> <span class="no">VIP</span><span class="o">();</span>
+<span class="c1">// DB에서 조회한 VIP 정보 입력</span>
+
+<span class="n">member</span><span class="o">.</span><span class="na">setRole</span><span class="o">(</span><span class="n">vip</span><span class="o">);</span>
+<span class="c1">// Member의 Role 결정</span>
+<span class="k">return</span> <span class="n">member</span><span class="o">;</span>
+</code></pre></div></div>
+
+<p>이런 식으로 진행되는데</p>
+
+<p>자 여기서 그 member의 나이를 가져오고 싶은데</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">member</span><span class="o">.</span><span class="na">getAge</span><span class="o">()</span>
+</code></pre></div></div>
+<p>가 먹힐까요?</p>
+
+<p>설정한 Role에 대해선 당연히 되지만</p>
+
+<p>우리는 쿼리문으로 Age에 대해 설정한 것이 아무것도 없으므로 당연히 null 이 나오게 됩니다.</p>
+
+<p>즉 웹과 같이 협업이 자주 이루어지는 환경에서 예를 들어 이런 코드가 있다고 가정했을 때</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nf">MemberService</span><span class="o">(){</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">A</span><span class="o">(){</span>
+        <span class="nc">Member</span> <span class="n">member</span> <span class="o">=</span> <span class="n">memberDao</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="n">memberId</span><span class="o">);</span>
+        <span class="n">member</span><span class="o">.</span><span class="na">getRole</span><span class="o">();</span>
+        <span class="n">member</span><span class="o">.</span><span class="na">getAge</span><span class="o">();</span>
+        <span class="n">member</span><span class="o">.</span><span class="na">getDelivery</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<p>단순히 위 코드만 보고 member가 Role을 가져올지, Age를 가져올지, 아니면 배송 정보를 확실하게 가져올지 정말 신뢰가 가능한가요?</p>
+
+<p>내가 짠 코드라면 당연히 이해가가겠지만 남이 짠 코드를 봤을 때 이 코드가 정확하게 해당 정보를 가져올 수 있는지에 대한 신뢰가 깨집니다.</p>
+
+<p>그럼 또 memberService에 대한 구현 자체에 집중하는 것이 아니라 mapper.xml에 가서 어떻게 정보를 가져오는지 한참을 들여다봐야되겠죠.</p>
+
+<p>결과론적으로, 이러한 SQL 의존적인 프레임워크는 <strong>Layered Architecture</strong> 에서 진정한 의미의 계층 분할이 어렵다는 점을 야기합니다.</p>
+
+:ET
