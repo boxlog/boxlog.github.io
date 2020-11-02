@@ -1,0 +1,22 @@
+I"1<p>JPA를 사용하기로 마음먹었다면 가장 먼저 알아야 할 것이 영속성 컨텍스트 라고 생각합니다.</p>
+
+<p>영어로 번역하면 Persistence Context 입니다.</p>
+
+<p>먼저 영속성 컨텍스트를 이해하기 위해서는 JPA의 EntityManagerFactory와 EntityManager 를 알아야합니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">EntityManagerFactory</span> <span class="n">emf</span> <span class="o">=</span> <span class="nc">Persistence</span><span class="o">.</span><span class="na">createEntityManagerFactory</span><span class="o">(</span><span class="err">"</span><span class="n">name</span><span class="o">);</span>
+
+<span class="nc">EntityManager</span> <span class="n">em</span> <span class="o">=</span> <span class="n">emf</span><span class="o">.</span><span class="na">createEntityManager</span><span class="o">();</span>
+</code></pre></div></div>
+
+<p><img src="/img/posts/jpa01.jpg" width="80%" align="center" /></p>
+
+<hr />
+
+<p><img src="/img/posts/jpa02.jpg" width="80%" align="center" /></p>
+
+<p>사실 영속성 컨텍스트 같은 경우 논리적인 개념으로 실제 사용자가 볼 수 있는 것은 아닙니다.</p>
+
+<p>즉 영속성 컨텍스트를 사용하기 위해선 그림에서</p>
+
+:ET
