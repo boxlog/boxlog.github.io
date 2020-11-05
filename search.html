@@ -1,12 +1,25 @@
 ---
+title: Search
+description: "Search this site"
 layout: page
-title: Search Page
-description: Have questions? I have answers.
-background: '/img/bg-contact.jpg'
-form: true
+permalink: /search/
+background: '/img/bg-about.jpg'
+tipue_search_active: true
+exclude_from_search: true
 ---
 
 
 
-<div class="gcse-search"><script async src="https://cse.google.com/cse.js?cx=45d47cd1b243725fe"></script></div>
-</form>
+<div id="tipue_search_content"></div>
+
+<script>
+$(document).ready(function() {
+  $('#tipue_search_input').tipuesearch({
+    'wholeWords' : true,
+    'showTime' : false,
+    'minimumLength' : 1
+  });
+});
+</script>
+
+
