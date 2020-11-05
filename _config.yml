@@ -20,18 +20,10 @@ markdown:           kramdown
 paginate:           5
 paginate_path:      "/posts/page:num/"
 plugins:
-  - jekyll-feed
+  # - jekyll-feed
   - jekyll-paginate
   - jekyll-seo-tag
   - jekyll-sitemap ## Uncomment this line to silently generate a sitemaps.org compliant sitemap for your Jekyll site
 
   #############
 
-tipue_search:
-    include:
-        pages: false
-        collections: []
-    exclude:
-        files: [search.html, index.html, tags.html]
-        categories: []
-        tags: []
