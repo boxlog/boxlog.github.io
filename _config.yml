@@ -36,3 +36,13 @@ social:
 
 
 ###### end of SEO variable
+
+
+#### defaults front matter ####
+defaults:
+  - scope:
+    path: ""
+    values:
+      image: /img/posts/bg-index.jpg
+      hight: 400
+      width: 400
