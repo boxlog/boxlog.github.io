@@ -34,6 +34,10 @@ layout: default
               ({{ category | last | size }})</a>
             </li>
             {% endfor %}
+            <form class="example" action="/search.html" style="margin:auto;max-width:300px" method="GET">
+              <input type="text" placeholder="Search.." name="query" id="search-box">
+              <button type="submit" value="search"><i class="fa fa-search"></i></button>
+            </form>
           </ul>
       </div>
       
