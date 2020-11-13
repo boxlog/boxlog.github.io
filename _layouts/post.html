@@ -2,6 +2,21 @@
 layout: default
 ---
 
+<head>
+  <style>
+    ul{
+      max-width: 100%;
+    }
+    li {
+        padding: 5px 0px 5px 5px;
+        margin-bottom: 5px;
+        border-bottom: 0px solid #efefef;
+        font-size: 18px;
+    }
+    </style>
+</head>
+
+
 <!-- Page Header -->
 {% if page.background %}
 <header class="masthead" style="background-image: url('{{ page.background | prepend: site.baseurl | replace: '//', '/' }}')">
@@ -51,6 +66,7 @@ layout: default
         {{ content }}
 
         <hr>
+        
         
 
         <div class="clearfix">
