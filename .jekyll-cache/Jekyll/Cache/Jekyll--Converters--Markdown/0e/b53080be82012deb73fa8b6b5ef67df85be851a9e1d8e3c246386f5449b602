@@ -1,0 +1,118 @@
+I"�"<p>JPA에서 프록시가 왜 필요할까요?</p>
+
+<p>Member 객체 내부에 Team 객체가 있다고 생각해봅시다.</p>
+
+<p>Member 를 불러올 때 Team을 불러오는 상황도 있지만 당연히 없는 상황도 있기 마련입니다.</p>
+
+<p>즉 필요없는 상황에서도 Team을 계속 불러오는 것은 낭비일 수 밖에 없습니다.</p>
+
+<p>이런 낭비를 막기 위해 JPA는 <strong>‘프록시’</strong> 라는 것을 사용합니다.</p>
+
+<p><img src="https://user-images.githubusercontent.com/73692337/98363436-52a77980-2072-11eb-8097-fe08c4c637d1.JPG" alt="23" /></p>
+
+<p>그림의 프록시 내부의 target을 통해 원본을 찾아갑니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">em</span><span class="o">.</span><span class="na">find</span><span class="o">()</span> <span class="c1">// 실제 엔티티 객체 조회</span>
+<span class="n">em</span><span class="o">.</span><span class="na">getReference</span><span class="o">()</span> <span class="c1">// 프록시 객체 조회</span>
+</code></pre></div></div>
+
+<p>프록시 객체를 조회하기 위해 JPA는 getReference() 라는 메서드를 제공합니다.</p>
+
+<p>프록시는 원본 클래스를 상속 받아서 만들어지고, 실제 클래스와 겉모양이 같습니다.</p>
+
+<p>그래서 사용하는 입장에서 진짜 객체인지, 프록시 객체인지 구분하지않고 사용 가능합니다.</p>
+
+<p>JPA에서의 프록시는 초기화 과정이 중요합니다.</p>
+
+<p><img src="https://user-images.githubusercontent.com/73692337/98364363-ffcec180-2073-11eb-9c31-18e493309465.JPG" alt="1" width="70%" height="70%" class="center" /></p>
+
+<hr />
+<p>먼저 Client에서 프록시 객체로 요청을 합니다.</p>
+
+<p>그럼 Proxy 객체는 영속성 컨텍스트에서 초기화를 요청합니다.</p>
+
+<p>영속성 컨텍스트에서 DB 테이블 조회 후 원본 객체에 맞는 실제 Entity를 생성하게 됩니다.</p>
+
+<p>이제 Proxy 내부에 target이 원본 객체를 가리키고 있으므로 더이상 초기화작업 없이 바로 원본 객체를 가져올 수 있습니다.</p>
+
+<hr />
+
+<p><strong>중요한 점은 프록시 객체가 원본 객체로 ‘대체’ 되는 것이 아니라 실제 엔티티에 ‘접근’이 가능한 것 입니다.</strong></p>
+
+<p>그리고 프록시 객체는 원본 엔티티를 상속 받기 때문에 타입 체크 시 주의해야 합니다.</p>
+
+<p>확인을 위한 테스트 코드를 작성했습니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Member</span> <span class="n">member1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Member</span><span class="o">();</span>
+<span class="n">member1</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="s">"kim"</span><span class="o">);</span>
+        
+<span class="nc">Member</span> <span class="n">member2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Member</span><span class="o">();</span>
+<span class="n">member2</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="s">"Lee"</span><span class="o">);</span>
+
+<span class="n">em</span><span class="o">.</span><span class="na">persist</span><span class="o">(</span><span class="n">member1</span><span class="o">);</span>
+<span class="n">em</span><span class="o">.</span><span class="na">persist</span><span class="o">(</span><span class="n">member2</span><span class="o">);</span>
+
+<span class="n">em</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+<span class="n">em</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+
+<span class="nc">Member</span> <span class="n">memberA</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="nc">Member</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">member1</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+<span class="nc">Member</span> <span class="n">memberB</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="nc">Member</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">member2</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"(memberA == memberB) = "</span> <span class="o">+</span> <span class="o">(</span><span class="n">memberA</span><span class="o">.</span><span class="na">getClass</span><span class="o">()</span> <span class="o">==</span> <span class="n">memberB</span><span class="o">.</span><span class="na">getClass</span><span class="o">()));</span>
+</code></pre></div></div>
+<pre><code class="language-debug">2020-11-06 21:24:09.992 TRACE 46796 --- [    Test worker] o.h.type.descriptor.sql.BasicExtractor   : extracted value ([name6_3_0_] : [VARCHAR]) - [Lee]
+(memberA == memberB) = true
+2020-11-06 21:24:10.003  INFO 46796 --- [    Test worker] o.s.t.c.transaction.TransactionContext   : Committed transaction for test:
+</code></pre>
+
+<p>true가 나옵니다. 코드를 다음과 같이 수정합니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Member</span> <span class="n">memberA</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="nc">Member</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">member1</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+<span class="nc">Member</span> <span class="n">memberB</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="na">getReference</span><span class="o">(</span><span class="nc">Member</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">member2</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+</code></pre></div></div>
+
+<pre><code class="language-debug">[VARCHAR]) - [kim]
+(memberA == memberB) = false
+2020-11-06 21:28:06.709  INFO 10
+</code></pre>
+
+<p>false가 나옵니다.</p>
+
+<p>JPA는 같은 클래스로부터의 타입 비교는 같음을 보장해주지만 프록시 객체는 그렇지 않다는 점을 주의하셔야합니다.</p>
+
+<p>올바르게 타입 체크를 하려면 다음과 같아야 true가 나옵니다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"(memberA == memberB) = "</span> <span class="o">+</span> 
+<span class="o">((</span><span class="n">memberA</span> <span class="k">instanceof</span> <span class="nc">Member</span><span class="o">)</span> <span class="o">==</span> <span class="o">(</span><span class="n">memberB</span> <span class="k">instanceof</span> <span class="nc">Member</span><span class="o">)));</span>
+</code></pre></div></div>
+
+<hr />
+
+<p><img src="https://user-images.githubusercontent.com/73692337/98364363-ffcec180-2073-11eb-9c31-18e493309465.JPG" alt="1" width="70%" height="70%" class="center" /></p>
+
+<p>여기서 다시 한번 사진을 보겠습니다.</p>
+
+<p>만약 Proxy를 초기화 하려는데 영속성 컨텍스트의 도움을 못받는 상황이라면 어떻게 될까요?</p>
+
+<p>LazyInitializationException 예외가 나옵니다.
+코드에서 em.close()나 em.detach() 를 추가해보시면 예외를 터트리는걸 볼 수 있습니다.</p>
+
+<hr />
+
+<p>하이버네이트는 프록시 확인에 관련된 여러가지 메서드를 지원합니다.</p>
+
+<p><strong>프록시 인스턴스 초기화 확인</strong></p>
+
+<p>PersistenceUnitUtil.isLoaded(Object Entity)</p>
+
+<p>참고로 사용하려면 EntityManagerFactory 인스턴스를 통해 사용이 가능합니다.</p>
+
+<p><strong>프록시 강제 초기화</strong></p>
+
+<p>Hibernate.initialize(entity)</p>
+
+<p>이 초기화 메서드는 하이버네이트에서 지원하므로 JPA 표준에서는 지원하지 않습니다. JPA 표준은 위 코드처럼 member.getName()을 사용하면 초기화 시킬 수 있습니다.</p>
+
+<hr />
+
+:ET
