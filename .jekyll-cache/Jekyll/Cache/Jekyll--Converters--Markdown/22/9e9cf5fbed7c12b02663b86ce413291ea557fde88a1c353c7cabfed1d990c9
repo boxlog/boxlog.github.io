@@ -1,0 +1,21 @@
+I"I<p>부트를 사용하지 않을 때는 META-INF 내부의 persistence.xml 파일의 unit-name과 persistenceUnitName을 서로 매칭 시켜주면 되지만 부트는 persistence.xml 파일 자체가 없습니다. 자동으로 설정해주기 때문이죠.</p>
+
+<p>그런데 테스트코드에서 가끔 EntityManagerFactory를 사용하고 싶을 때가 있습니다.</p>
+
+<hr />
+<p><img src="https://user-images.githubusercontent.com/73692337/98381816-c1460080-208d-11eb-9590-b0e82599c565.JPG" alt="22" width="100%" height="100%" class="center" /></p>
+
+<p>매칭할 UnitName이 없어..</p>
+
+<hr />
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nd">@PersistenceContext</span>
+    <span class="nc">EntityManager</span> <span class="n">em</span><span class="o">;</span>
+
+    <span class="nd">@PersistenceUnit</span>
+    <span class="nc">EntityManagerFactory</span> <span class="n">emf</span><span class="o">;</span>
+</code></pre></div></div>
+
+<p>이럴땐 위의 어노테이션으로 간편하게 사용 가능합니다.</p>
+
+:ET
